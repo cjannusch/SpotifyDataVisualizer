@@ -10,24 +10,24 @@ import java.util.Arrays;
 public class SpotifySong {
 
   private double acousticness;
-  private String[] artists;
+  private String[] artists; // song only
   private double danceability;
   private int duration_ms;
   private double energy;
-  private boolean explicit;
-  private String id;
+  private boolean explicit; // song only
+  private String id; // song only
   private double instrumentalness;
-  private String key;
+  private String key; // song only
   private double liveness;
   private double loudness;
-  private int mode; // 0=minor 1=major
+  private int mode; // 0=minor 1=major //song only
   private String name;
   private int popularity;
-  private String release_date;
+  private String release_date; // song only
   private double speechiness;
   private double tempo;
   private double valence;
-  private int year;
+  private int year; // song only
 
 
   /**

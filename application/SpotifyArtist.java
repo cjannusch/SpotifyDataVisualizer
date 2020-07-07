@@ -1,8 +1,17 @@
 package application;
+
 import java.util.ArrayList;
 
 public class SpotifyArtist {
 
+//  private String artists = "N/A"; // only used for printing to List in Main
+//  private String explicit = "N/A"; // only used for printing to List in Main
+//  private String id = "N/A"; // only used for printing to List in Main
+//  private String key = "N/A"; // only used for printing to List in Main
+//  private String mode = "N/A"; // only used for printing to List in Main
+//  private String release_date = "N/A"; // only used for printing to List in Main
+//  private String year = "N/A"; // only used for printing to List in Main
+  private double acousticness;
   private String name;
   private double danceability;
   private int duration_ms;
@@ -27,6 +36,7 @@ public class SpotifyArtist {
     double tempSpeechiness = 0.0;
     double tempTempo = 0.0;
     double tempValence = 0.0;
+    double tempAcousticness = 0.0;
 
     for (int i = 0; i < songArray.size(); i++) {
       tempDanceability = tempDanceability + songArray.get(i).getDanceability();
@@ -38,6 +48,8 @@ public class SpotifyArtist {
       tempSpeechiness = tempSpeechiness + songArray.get(i).getSpeechiness();
       tempTempo = tempTempo + songArray.get(i).getTempo();
       tempValence = tempValence + songArray.get(i).getValence();
+      tempAcousticness = tempAcousticness + songArray.get(i).getAcousticness();
+
     }
 
     this.danceability = tempDanceability / songArray.size();
@@ -81,5 +93,128 @@ public class SpotifyArtist {
 
     return easyToRead;
   }
+
+
+
+  /**
+   * Returns the value of the field called 'acousticness'.
+   * 
+   * @return Returns the acousticness.
+   */
+  public double getAcousticness() {
+    return this.acousticness;
+  }
+
+
+
+  /**
+   * Returns the value of the field called 'name'.
+   * 
+   * @return Returns the name.
+   */
+  public String getName() {
+    return this.name;
+  }
+
+
+
+  /**
+   * Returns the value of the field called 'danceability'.
+   * 
+   * @return Returns the danceability.
+   */
+  public double getDanceability() {
+    return this.danceability;
+  }
+
+
+
+  /**
+   * Returns the value of the field called 'duration_ms'.
+   * 
+   * @return Returns the duration_ms.
+   */
+  public int getDuration_ms() {
+    return this.duration_ms;
+  }
+
+
+
+  /**
+   * Returns the value of the field called 'energy'.
+   * 
+   * @return Returns the energy.
+   */
+  public double getEnergy() {
+    return this.energy;
+  }
+
+
+
+  /**
+   * Returns the value of the field called 'instrumentalness'.
+   * 
+   * @return Returns the instrumentalness.
+   */
+  public double getInstrumentalness() {
+    return this.instrumentalness;
+  }
+
+
+
+  /**
+   * Returns the value of the field called 'liveness'.
+   * 
+   * @return Returns the liveness.
+   */
+  public double getLiveness() {
+    return this.liveness;
+  }
+
+
+
+  /**
+   * Returns the value of the field called 'popularity'.
+   * 
+   * @return Returns the popularity.
+   */
+  public int getPopularity() {
+    return this.popularity;
+  }
+
+
+
+  /**
+   * Returns the value of the field called 'speechiness'.
+   * 
+   * @return Returns the speechiness.
+   */
+  public double getSpeechiness() {
+    return this.speechiness;
+  }
+
+
+
+  /**
+   * Returns the value of the field called 'tempo'.
+   * 
+   * @return Returns the tempo.
+   */
+  public double getTempo() {
+    return this.tempo;
+  }
+
+
+
+  /**
+   * Returns the value of the field called 'valence'.
+   * 
+   * @return Returns the valence.
+   */
+  public double getValence() {
+    return this.valence;
+  }
+
+
 
 }

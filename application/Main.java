@@ -1,10 +1,13 @@
 package application;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -33,7 +36,13 @@ public class Main extends Application {
   private String artistToGraph2;
   private String songToGraph1;
   private String songToGraph2;
-
+  private ListView listView2 = new ListView();
+  private ListView listView1 = new ListView();
+  private SpotifyArtist SpotifyArtist1;
+  private SpotifyArtist SpotifyArtist2;
+  private SpotifySong SpotifySong1;
+  private SpotifySong SpotifySong2;
+  private ArrayList<SpotifySong> incorrectArtistList = new ArrayList<SpotifySong>();
 
 
   public static void main(String[] args) {
@@ -49,18 +58,19 @@ public class Main extends Application {
     // setup for grid pane
 
     Label song1 = new Label("Song 1:");
-    // Button song1Button = new Button("testSong1"); // change the menu later
     Label artist1 = new Label("Artist 1:");
-    // Button artist1Button = new Button("artistSong1"); // change the menu later
     Label song2 = new Label("Song 2:");
-    // Button song2Button = new Button("testSong2"); // change the menu later
     Label artist2 = new Label("Artist 2:");
-    // Button artist2Button = new Button("artistSong2"); // change the menu later
-    Button findSimilarSong = new Button("Find Similar Song");
-    Button findSimilarArtist = new Button("Find Similar Artist");
+    // Button findSimilarSong = new Button("Find Similar Song");
+    // Button findSimilarArtist = new Button("Find Similar Artist");
     Label data1 = new Label("Data for song/artist 1:");
     Label data2 = new Label("Data for song/artist 2:");
     Button graphData = new Button("Graph Data");
+    Button printOut = new Button("Print Selection to Text File");
+    Button wrongArtist = new Button("Wrong Artist?");
+    Label songD = new Label("yeee");
+
+
 
     ComboBox<String> cb = new ComboBox<String>();
     ComboBox<String> cb2 = new ComboBox<String>();
@@ -80,18 +90,15 @@ public class Main extends Application {
 
     GridPane testGridPane = new GridPane();
 
-    VBox col1 = new VBox(song1, cb, artist1, cb3, data1, graphData);
-    VBox col2 = new VBox(song2, cb2, artist2, cb4, data2);
+    VBox col1 = new VBox(song1, cb, artist1, cb3, data1, listView1, graphData);
+    VBox col2 = new VBox(song2, cb2, artist2, cb4, data2, listView2, printOut);
     data2.setAlignment(Pos.BOTTOM_LEFT);
     col1.setSpacing(20);
     col2.setSpacing(20);
-    // col1.setAlignment(Pos.TOP_LEFT);
-    // col2.setAlignment(Pos.TOP_RIGHT);
     testGridPane.setPadding(new Insets(10, 10, 10, 10));
 
     testGridPane.add(col1, 0, 0, 1, 1);
     testGridPane.add(col2, 1, 0, 1, 1);
-
 
     // debugging layout line since im lazy like that
     // testGridPane.setGridLinesVisible(true);
@@ -110,20 +117,6 @@ public class Main extends Application {
 
 
 
-    // setup for without file choosing
-
-    // Scene primaryScene = new Scene(gridPane, 1080, 720);
-    //
-    // Button button = new Button("Select File");
-    // Scene loadScene = new Scene(button, 1080, 720);
-    // primaryStage.setScene(primaryScene);
-    // primaryStage.show();
-
-    // --------------------------------------------------------------
-
-    // setup for file choosing
-
-
     FileChooser fileChooser = new FileChooser();
     fileChooser.getExtensionFilters().add(new ExtensionFilter("CSV Files", "*.csv"));
 
@@ -133,7 +126,6 @@ public class Main extends Application {
     primaryStage.show();
 
     Scene primaryScene = new Scene(testGridPane, 1080, 720);
-    // Scene primaryScene = new Scene(col1);
 
     Scene graphScene = new Scene(new GridPane(), 1080, 720);
 
@@ -143,8 +135,6 @@ public class Main extends Application {
     });
 
 
-
-    // --------------------------------------------------------------------------
 
   }
 
@@ -182,10 +172,21 @@ public class Main extends Application {
       public void changed(ObservableValue ov, String t, String t1) {
         songToGraph1 = t1;
 
-        if (artistToGraph1 != null)
+        if (artistToGraph1 != null) {
           artistToGraph1 = null;
-        if (artistToGraph2 != null)
+          SpotifyArtist1 = null;
+        }
+
+        if (artistToGraph2 != null) {
           artistToGraph2 = null;
+          SpotifyArtist2 = null;
+        }
+
+        // convert string song to actual Spotify Song
+
+
+
+        checkSelections();
 
         System.out.println("Song1: " + songToGraph1);
       }
@@ -195,10 +196,22 @@ public class Main extends Application {
       public void changed(ObservableValue ov, String t, String t1) {
         songToGraph2 = t1;
 
-        if (artistToGraph1 != null)
+        if (artistToGraph1 != null) {
           artistToGraph1 = null;
-        if (artistToGraph2 != null)
+          SpotifyArtist1 = null;
+        }
+
+        if (artistToGraph2 != null) {
           artistToGraph2 = null;
+          SpotifyArtist2 = null;
+        }
+
+
+        // convert string song to actual Spotify Song
+
+
+
+        checkSelections();
 
         System.out.println("Song2: " + songToGraph2);
       }
@@ -208,10 +221,21 @@ public class Main extends Application {
       public void changed(ObservableValue ov, String t, String t1) {
         artistToGraph1 = t1;
 
-        if (songToGraph1 != null)
+        if (songToGraph1 != null) {
           songToGraph1 = null;
-        if (songToGraph2 != null)
+          SpotifySong1 = null;
+        }
+
+        if (songToGraph2 != null) {
           songToGraph2 = null;
+          SpotifySong2 = null;
+        }
+
+        // convert string song to actual Spotify Artist
+
+
+
+        checkSelections();
 
         System.out.println("Artist1: " + artistToGraph1);
       }
@@ -221,10 +245,32 @@ public class Main extends Application {
       public void changed(ObservableValue ov, String t, String t1) {
         artistToGraph2 = t1;
 
-        if (songToGraph1 != null)
+        if (songToGraph1 != null) {
           songToGraph1 = null;
-        if (songToGraph2 != null)
+          SpotifySong1 = null;
+        }
+
+        if (songToGraph2 != null) {
           songToGraph2 = null;
+          SpotifySong2 = null;
+        }
+
+        // convert string song to actual Spotify Artist
+
+        // for (int i = 0; i < loadedCSV.getSongArray().size(); i++) {
+        // for (int j = 0; j < loadedCSV.getSongArray().get(i).getArtists().length; j++) {
+        //
+        // String[] artists = loadedCSV.getSongArray().get(i).getArtists();
+
+        // if (artists[j].equals(artistToGraph2)) {
+        SpotifyArtist2 =
+            new SpotifyArtist(artistToGraph2, loadedCSV.searchByArtistName(artistToGraph2));
+        // }
+        // }
+        // }
+
+
+        checkSelections();
 
         System.out.println("Artist2: " + artistToGraph2);
       }
@@ -282,6 +328,91 @@ public class Main extends Application {
 
     cb.setItems(filteredItems);
   }
+
+  private void checkSelections() {
+
+    if (this.SpotifyArtist1 != null && this.SpotifyArtist2 != null) {
+      // graph two artists
+      listView1.getItems().add("Name: " + this.SpotifyArtist1.getName());
+      listView1.getItems().add("Popularity: " + this.SpotifyArtist1.getPopularity());
+      listView1.getItems().add("Acousticness: " + this.SpotifyArtist1.getAcousticness());
+      listView1.getItems().add("Danceability: " + this.SpotifyArtist1.getDanceability());
+      listView1.getItems().add("Duration_ms: " + this.SpotifyArtist1.getDuration_ms());
+      listView1.getItems().add("Energy: " + this.SpotifyArtist1.getEnergy());
+      listView1.getItems().add("Instrumentalness: " + this.SpotifyArtist1.getInstrumentalness());
+      listView1.getItems().add("Liveness: " + this.SpotifyArtist1.getLiveness());
+      listView1.getItems().add("Speechiness: " + this.SpotifyArtist1.getSpeechiness());
+      listView1.getItems().add("Tempo: " + this.SpotifyArtist1.getTempo());
+      listView1.getItems().add("Valence: " + this.SpotifyArtist1.getValence());
+
+      listView2.getItems().add("Name: " + this.SpotifyArtist2.getName());
+      listView2.getItems().add("Popularity: " + this.SpotifyArtist2.getPopularity());
+      listView2.getItems().add("Acousticness: " + this.SpotifyArtist2.getAcousticness());
+      listView2.getItems().add("Danceability: " + this.SpotifyArtist2.getDanceability());
+      listView2.getItems().add("Duration_ms: " + this.SpotifyArtist2.getDuration_ms());
+      listView2.getItems().add("Energy: " + this.SpotifyArtist2.getEnergy());
+      listView2.getItems().add("Instrumentalness: " + this.SpotifyArtist2.getInstrumentalness());
+      listView2.getItems().add("Liveness: " + this.SpotifyArtist2.getLiveness());
+      listView2.getItems().add("Speechiness: " + this.SpotifyArtist2.getSpeechiness());
+      listView2.getItems().add("Tempo: " + this.SpotifyArtist2.getTempo());
+      listView2.getItems().add("Valence: " + this.SpotifyArtist2.getValence());
+
+
+    }
+
+    if (this.SpotifySong1 != null && this.SpotifySong2 != null) {
+      // graph two songs
+
+      listView1.getItems().add("Name: " + this.SpotifySong1.getName());
+      listView1.getItems().add("Artists: " + Arrays.deepToString(this.SpotifySong1.getArtists()));
+      listView1.getItems().add("Popularity: " + this.SpotifySong1.getPopularity());
+      listView1.getItems().add("Acousticness: " + this.SpotifySong1.getAcousticness());
+      listView1.getItems().add("Danceability: " + this.SpotifySong1.getDanceability());
+      listView1.getItems().add("Duration_ms: " + this.SpotifySong1.getDuration_ms());
+      listView1.getItems().add("Energy: " + this.SpotifySong1.getEnergy());
+      listView1.getItems().add("Instrumentalness: " + this.SpotifySong1.getInstrumentalness());
+      listView1.getItems().add("Liveness: " + this.SpotifySong1.getLiveness());
+      listView1.getItems().add("Speechiness: " + this.SpotifySong1.getSpeechiness());
+      listView1.getItems().add("Tempo: " + this.SpotifySong1.getTempo());
+      listView1.getItems().add("Valence: " + this.SpotifySong1.getValence());
+      listView1.getItems().add("Key: " + this.SpotifySong1.getKey());
+      listView1.getItems().add("Release Date: " + this.SpotifySong1.getRelease_date());
+
+      if (this.SpotifySong1.isExplicit()) {
+        listView1.getItems().add("Explicit: Yes");
+      } else
+        listView1.getItems().add("Explicit: No");
+
+
+
+      listView2.getItems().add("Name: " + this.SpotifySong2.getName());
+      listView2.getItems().add("Artists: " + Arrays.deepToString(this.SpotifySong2.getArtists()));
+      listView2.getItems().add("Popularity: " + this.SpotifySong2.getPopularity());
+      listView2.getItems().add("Acousticness: " + this.SpotifySong2.getAcousticness());
+      listView2.getItems().add("Danceability: " + this.SpotifySong2.getDanceability());
+      listView2.getItems().add("Duration_ms: " + this.SpotifySong2.getDuration_ms());
+      listView2.getItems().add("Energy: " + this.SpotifySong2.getEnergy());
+      listView2.getItems().add("Instrumentalness: " + this.SpotifySong2.getInstrumentalness());
+      listView2.getItems().add("Liveness: " + this.SpotifySong2.getLiveness());
+      listView2.getItems().add("Speechiness: " + this.SpotifySong2.getSpeechiness());
+      listView2.getItems().add("Tempo: " + this.SpotifySong2.getTempo());
+      listView2.getItems().add("Valence: " + this.SpotifySong2.getValence());
+      listView2.getItems().add("Key: " + this.SpotifySong2.getKey());
+      listView2.getItems().add("Release Date: " + this.SpotifySong2.getRelease_date());
+
+      if (this.SpotifySong2.isExplicit()) {
+        listView2.getItems().add("Explicit: Yes");
+      } else
+        listView2.getItems().add("Explicit: No");
+
+
+    }
+
+
+  }
+
+
+
 }
 
 
