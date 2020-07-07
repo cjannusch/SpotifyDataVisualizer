@@ -42,8 +42,10 @@ public class Main extends Application {
   private SpotifyArtist SpotifyArtist2;
   private SpotifySong SpotifySong1;
   private SpotifySong SpotifySong2;
-  private ArrayList<SpotifySong> incorrectArtistList1 = new ArrayList<SpotifySong>();
-  private ArrayList<SpotifySong> incorrectArtistList2 = new ArrayList<SpotifySong>();
+  // private ArrayList<SpotifySong> incorrectArtistList1 = new ArrayList<SpotifySong>();
+  // private ArrayList<SpotifySong> incorrectArtistList2 = new ArrayList<SpotifySong>();
+  TextField outputFileField = new TextField();
+  Button printOut = new Button("Print Selection to Text File");
 
   public static void main(String[] args) {
     launch(args);
@@ -66,7 +68,11 @@ public class Main extends Application {
     Label data1 = new Label("Data for song/artist 1:");
     Label data2 = new Label("Data for song/artist 2:");
     Button graphData = new Button("Graph Data");
-    Button printOut = new Button("Print Selection to Text File");
+    Label outputFileNameLabel = new Label("File Name To Output To:");
+    // css styling!!
+    outputFileNameLabel.setStyle("-fx-padding: 9 0 0 0;");
+    listView1.setStyle("-fx-background-color: lightsteelblue;");
+    listView2.setStyle("-fx-background-color: palevioletred;");
     Button wrongArtist1 = new Button("Wrong Artist?");
     Button wrongArtist2 = new Button("Wrong Artist?");
     Label songD = new Label("yeee");
@@ -91,8 +97,8 @@ public class Main extends Application {
 
     GridPane testGridPane = new GridPane();
 
-    VBox col1 = new VBox(song1, cb, artist1, cb3, wrongArtist1, data1, listView1, graphData);
-    VBox col2 = new VBox(song2, cb2, artist2, cb4, wrongArtist2, data2, listView2, printOut);
+    VBox col1 = new VBox(song1, cb, artist1, cb3, outputFileNameLabel, data1, listView1, graphData);
+    VBox col2 = new VBox(song2, cb2, artist2, cb4, outputFileField, data2, listView2, printOut);
     data2.setAlignment(Pos.BOTTOM_LEFT);
     col1.setSpacing(20);
     col2.setSpacing(20);
@@ -167,6 +173,10 @@ public class Main extends Application {
       artists2.add(tempArtistName);
     }
 
+    printOut.setOnAction(action -> {
+      System.out.println(outputFileField.getText());
+    });
+
     cb.valueProperty().addListener(new ChangeListener<String>() {
       @Override
       public void changed(ObservableValue ov, String t, String t1) {
@@ -188,10 +198,8 @@ public class Main extends Application {
 
           if (loadedCSV.getSongArray().get(i).getName().equals(songToGraph1)) {
             SpotifySong1 = loadedCSV.getSongArray().get(i);
-            // incorrectArtistList1.add(loadedCSV.getSongArray().get(i));
           }
         }
-        // SpotifySong1 = incorrectArtistList1.get(0);
 
         checkSelections();
 
@@ -220,12 +228,8 @@ public class Main extends Application {
 
           if (loadedCSV.getSongArray().get(i).getName().equals(songToGraph2)) {
             SpotifySong2 = loadedCSV.getSongArray().get(i);
-            // incorrectArtistList2.add(loadedCSV.getSongArray().get(i));
           }
         }
-        // SpotifySong2 = incorrectArtistList2.get(0);
-
-
 
         checkSelections();
 
