@@ -9,6 +9,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -17,6 +18,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -54,6 +56,8 @@ public class Main extends Application {
   @Override
   public void start(Stage primaryStage) throws Exception {
     primaryStage.setTitle("Spotify Data Visualizer");
+//    primaryStage.initStyle(StageStyle.UTILITY);
+    primaryStage.getIcons().add(new Image("spotifyImage.jpg"));
 
     GridPane gridPane = new GridPane();
 
