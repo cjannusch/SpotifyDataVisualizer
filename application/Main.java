@@ -3,10 +3,8 @@ package application;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Scanner;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -16,13 +14,11 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -143,7 +139,7 @@ public class Main extends Application {
     primaryStage.show();
 
     Scene primaryScene = new Scene(testGridPane, 500, 700);
-    // Scene graphScene = new Scene(new GridPane(), 1080, 720);
+    primaryScene.getStylesheets().add("/application/application.css");
 
     selectFileButton.setOnAction(e -> {
       runPrimaryView(cb2, cb3, cb4, primaryStage, cb, songs1, songs2, fileChooser, primaryScene,
