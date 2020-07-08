@@ -7,13 +7,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.chart.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -46,10 +49,33 @@ public class Main extends Application {
   private SpotifySong SpotifySong2;
   // private ArrayList<SpotifySong> incorrectArtistList1 = new ArrayList<SpotifySong>();
   // private ArrayList<SpotifySong> incorrectArtistList2 = new ArrayList<SpotifySong>();
-  TextField outputFileField = new TextField();
+  TextField outputFileField = new TextField("output");
   Button printOut = new Button("Print Selection to Text File");
   String outputFileName = "";
   ArrayList<String> textToBeWritten = new ArrayList<String>();
+
+  GridPane graphGridPane = new GridPane();
+  Scene graphScene = new Scene(graphGridPane, 1080, 720);
+  Button goBackToPrimary = new Button("Back");
+
+  // chart stuff
+
+   NumberAxis xAxis = new NumberAxis("Values for X-Axis", 0, 3, 1);
+   NumberAxis yAxis = new NumberAxis("Values for Y-Axis", 0, 3, 1);
+
+  // line chart example
+
+   ObservableList<XYChart.Series<Double, Double>> lineChartData =
+   FXCollections.observableArrayList(
+   new LineChart.Series<Double, Double>("Series 1", FXCollections.observableArrayList(
+   new XYChart.Data<Double, Double>(0.0, 1.0), new XYChart.Data<Double, Double>(1.2, 1.4),
+   new XYChart.Data<Double, Double>(2.2, 1.9), new XYChart.Data<Double, Double>(2.7, 2.3),
+   new XYChart.Data<Double, Double>(2.9, 0.5))),
+   new LineChart.Series<Double, Double>("Series 2", FXCollections.observableArrayList(
+   new XYChart.Data<Double, Double>(0.0, 1.6), new XYChart.Data<Double, Double>(0.8, 0.4),
+   new XYChart.Data<Double, Double>(1.4, 2.9), new XYChart.Data<Double, Double>(2.1, 1.3),
+   new XYChart.Data<Double, Double>(2.6, 0.9))));
+   LineChart chart = new LineChart(xAxis, yAxis, lineChartData);
 
   public static void main(String[] args) {
     launch(args);
@@ -60,8 +86,6 @@ public class Main extends Application {
     primaryStage.setTitle("Spotify Data Visualizer");
     // primaryStage.initStyle(StageStyle.UTILITY);
     primaryStage.getIcons().add(new Image("spotifyImageCustom.png"));
-
-    GridPane gridPane = new GridPane();
 
     // setup for grid pane
 
@@ -75,15 +99,14 @@ public class Main extends Application {
     Label data2 = new Label("Data for song/artist 2:");
     Button graphData = new Button("Graph Data");
     Label outputFileNameLabel = new Label("File Name To Output To:");
+
+
     // css styling!!
-    outputFileNameLabel.setStyle("-fx-padding: 9 0 0 0;");
-    listView1.setStyle("-fx-background-color: CHARTREUSE;");
+    outputFileNameLabel.setStyle("-fx-padding: 14 0 0 0;");
+    listView1.setStyle("-fx-background-color: BLACK;");
     listView2.setStyle("-fx-background-color: BLACK;");
-    Button wrongArtist1 = new Button("Wrong Artist?");
-    Button wrongArtist2 = new Button("Wrong Artist?");
-    Label songD = new Label("yeee");
 
-
+    // combobox setup requires ObervableLists for sorting
 
     ComboBox<String> cb = new ComboBox<String>();
     ComboBox<String> cb2 = new ComboBox<String>();
@@ -135,10 +158,15 @@ public class Main extends Application {
 
     Button selectFileButton = new Button("Select File");
     Scene loadScene = new Scene(selectFileButton, 1080, 720);
+
+    loadScene.getStylesheets().add("/application/application.css");
+
     primaryStage.setScene(loadScene);
     primaryStage.show();
 
-    Scene primaryScene = new Scene(testGridPane, 500, 700);
+
+
+    Scene primaryScene = new Scene(testGridPane, 700, 700);
     primaryScene.getStylesheets().add("/application/application.css");
 
     selectFileButton.setOnAction(e -> {
@@ -172,6 +200,8 @@ public class Main extends Application {
 
       String tempArtistName = loadedCSV.getArtistNames().get(i);
 
+
+      // some song names are super long and mess up spacing of the VBoxes
       if (tempArtistName.length() >= 30)
         tempArtistName = tempArtistName.substring(0, 30);
 
@@ -186,12 +216,14 @@ public class Main extends Application {
       }
 
       if (SpotifySong2 != null) {
-        textToBeWritten.add("You saved the song: " + SpotifySong2.getName() + "by "
+        textToBeWritten.add("You saved the song: " + SpotifySong2.getName() + " by: "
             + Arrays.deepToString(SpotifySong2.getArtists()));
       }
 
-      // TODO figure out what data type is best to hold a text file
     });
+
+
+    // combobox for song1, doesn't allow comparing a song to an artist
 
     cb.valueProperty().addListener(new ChangeListener<String>() {
       @Override
@@ -222,6 +254,9 @@ public class Main extends Application {
         System.out.println("Song1: " + songToGraph1);
       }
     });
+
+    // combobox for artist1, doesn't allow comparing a song to a song
+
     cb2.valueProperty().addListener(new ChangeListener<String>() {
       @Override
       public void changed(ObservableValue ov, String t, String t1) {
@@ -252,6 +287,9 @@ public class Main extends Application {
         System.out.println("Song2: " + songToGraph2);
       }
     });
+
+    // combobox for song2, doesn't allow comparing a song to an artist
+
     cb3.valueProperty().addListener(new ChangeListener<String>() {
       @Override
       public void changed(ObservableValue ov, String t, String t1) {
@@ -279,6 +317,9 @@ public class Main extends Application {
         System.out.println("Artist1: " + artistToGraph1);
       }
     });
+
+    // combobox for artist2, doesn't allow comparing a song to a song
+
     cb4.valueProperty().addListener(new ChangeListener<String>() {
       @Override
       public void changed(ObservableValue ov, String t, String t1) {
@@ -307,19 +348,47 @@ public class Main extends Application {
       }
     });
 
-    // still need to do this buttonHandler
+    // TODO still need to do this buttonHandler
 
-    EventHandler<ActionEvent> buttonHandler = new EventHandler<ActionEvent>() {
+    EventHandler<ActionEvent> graphHandler = new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent event) {
-        System.out.print("songToGraph1: " + songToGraph1 + "\n" + "songToGraph2: " + songToGraph2
-            + "\n" + "artistToGraph1: " + artistToGraph1 + "\n" + "artistToGraph1: "
-            + artistToGraph2 + "\n");
+        // System.out.print("songToGraph1: " + songToGraph1 + "\n" + "songToGraph2: " + songToGraph2
+        // + "\n" + "artistToGraph1: " + artistToGraph1 + "\n" + "artistToGraph1: "
+        // + artistToGraph2 + "\n");
+
+        BorderPane borderPane = new BorderPane();
+
+        borderPane.setBottom(goBackToPrimary);
+         borderPane.setCenter(chart);
+
+
+        // HBox test123 = new HBox(chart, goBackToPrimary);
+
+        Scene testGraph = new Scene(borderPane, 1080, 720);
+
+        primaryStage.setScene(testGraph);
+
+
+
         event.consume();
       }
     };
 
-    graphData.setOnAction(buttonHandler);
+    EventHandler<ActionEvent> backButtonHandler = new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent event) {
+
+        primaryStage.setScene(primaryScene);
+
+        event.consume();
+      }
+    };
+
+
+    goBackToPrimary.setOnAction(backButtonHandler);
+
+    graphData.setOnAction(graphHandler);
 
 
     primaryStage.setScene(primaryScene);
@@ -452,8 +521,9 @@ public class Main extends Application {
     System.out.println("Stage is closing");
 
 
+
     if (outputFileName.equals(""))
-      return;
+      outputFileName = "YouForgotToSetAFileNameSilly.txt";
 
     try {
       FileWriter writer = new FileWriter(outputFileName);
@@ -471,6 +541,27 @@ public class Main extends Application {
 
 
     // Save file
+  }
+
+  public void ImageBarChartSample() {
+
+    String imageBarChartCss =
+        ImageBarChartSample.class.getResource("ImageBarChart.css").toExternalForm();
+
+    BarChart barChart = new BarChart(new CategoryAxis(), new NumberAxis());
+    barChart.setLegendVisible(false);
+    barChart.getStylesheets().add(imageBarChartCss);
+
+    barChart.getData()
+        .add(new XYChart.Series<String, Integer>("Sales Per Product",
+            FXCollections.observableArrayList(new XYChart.Data<String, Integer>("SUV", 120),
+                new XYChart.Data<String, Integer>("Sedan", 50),
+                new XYChart.Data<String, Integer>("Truck", 180),
+                new XYChart.Data<String, Integer>("Van", 20))));
+
+    graphScene = new Scene(barChart, 350, 300);
+    graphScene.getStylesheets()
+        .add(ImageBarChartSample.class.getResource("ImageBarChart.css").toString());
   }
 
 
