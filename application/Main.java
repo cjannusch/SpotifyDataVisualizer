@@ -1,8 +1,12 @@
 package application;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Scanner;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -48,6 +52,8 @@ public class Main extends Application {
   // private ArrayList<SpotifySong> incorrectArtistList2 = new ArrayList<SpotifySong>();
   TextField outputFileField = new TextField();
   Button printOut = new Button("Print Selection to Text File");
+  String outputFileName = "";
+  ArrayList<String> textToBeWritten = new ArrayList<String>();
 
   public static void main(String[] args) {
     launch(args);
@@ -56,8 +62,8 @@ public class Main extends Application {
   @Override
   public void start(Stage primaryStage) throws Exception {
     primaryStage.setTitle("Spotify Data Visualizer");
-//    primaryStage.initStyle(StageStyle.UTILITY);
-    primaryStage.getIcons().add(new Image("spotifyImage.jpg"));
+    // primaryStage.initStyle(StageStyle.UTILITY);
+    primaryStage.getIcons().add(new Image("spotifyImageCustom.png"));
 
     GridPane gridPane = new GridPane();
 
@@ -75,8 +81,8 @@ public class Main extends Application {
     Label outputFileNameLabel = new Label("File Name To Output To:");
     // css styling!!
     outputFileNameLabel.setStyle("-fx-padding: 9 0 0 0;");
-    listView1.setStyle("-fx-background-color: lightsteelblue;");
-    listView2.setStyle("-fx-background-color: palevioletred;");
+    listView1.setStyle("-fx-background-color: CHARTREUSE;");
+    listView2.setStyle("-fx-background-color: BLACK;");
     Button wrongArtist1 = new Button("Wrong Artist?");
     Button wrongArtist2 = new Button("Wrong Artist?");
     Label songD = new Label("yeee");
@@ -178,7 +184,17 @@ public class Main extends Application {
     }
 
     printOut.setOnAction(action -> {
-      System.out.println(outputFileField.getText());
+      outputFileName = outputFileField.getText() + ".txt";
+      if (SpotifyArtist2 != null) {
+        textToBeWritten.add("You saved the artist: " + SpotifyArtist2.getName());
+      }
+
+      if (SpotifySong2 != null) {
+        textToBeWritten.add("You saved the song: " + SpotifySong2.getName() + "by "
+            + Arrays.deepToString(SpotifySong2.getArtists()));
+      }
+
+      // TODO figure out what data type is best to hold a text file
     });
 
     cb.valueProperty().addListener(new ChangeListener<String>() {
@@ -294,6 +310,8 @@ public class Main extends Application {
         System.out.println("Artist2: " + artistToGraph2);
       }
     });
+
+    // still need to do this buttonHandler
 
     EventHandler<ActionEvent> buttonHandler = new EventHandler<ActionEvent>() {
       @Override
@@ -431,6 +449,28 @@ public class Main extends Application {
     }
 
 
+  }
+
+  @Override
+  public void stop() {
+    System.out.println("Stage is closing");
+
+    try {
+      FileWriter writer = new FileWriter(outputFileName);
+
+      for (int i = 0; i < textToBeWritten.size(); i++) {
+        writer.write(textToBeWritten.get(i) + "\n");
+      }
+
+      writer.close();
+
+    } catch (IOException exception) {
+
+    }
+
+
+
+    // Save file
   }
 
 
