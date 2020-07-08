@@ -455,6 +455,10 @@ public class Main extends Application {
   public void stop() {
     System.out.println("Stage is closing");
 
+
+    if (outputFileName.equals(""))
+      return;
+
     try {
       FileWriter writer = new FileWriter(outputFileName);
 
