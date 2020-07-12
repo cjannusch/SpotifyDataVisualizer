@@ -57,25 +57,25 @@ public class Main extends Application {
   GridPane graphGridPane = new GridPane();
   Scene graphScene = new Scene(graphGridPane, 1080, 720);
   Button goBackToPrimary = new Button("Back");
+  Button skipLoadButton = new Button("Skip loading data");
 
   // chart stuff
 
-   NumberAxis xAxis = new NumberAxis("Values for X-Axis", 0, 3, 1);
-   NumberAxis yAxis = new NumberAxis("Values for Y-Axis", 0, 3, 1);
+  NumberAxis xAxis = new NumberAxis("Values for X-Axis", 0, 3, 1);
+  NumberAxis yAxis = new NumberAxis("Values for Y-Axis", 0, 3, 1);
 
   // line chart example
 
-   ObservableList<XYChart.Series<Double, Double>> lineChartData =
-   FXCollections.observableArrayList(
-   new LineChart.Series<Double, Double>("Series 1", FXCollections.observableArrayList(
-   new XYChart.Data<Double, Double>(0.0, 1.0), new XYChart.Data<Double, Double>(1.2, 1.4),
-   new XYChart.Data<Double, Double>(2.2, 1.9), new XYChart.Data<Double, Double>(2.7, 2.3),
-   new XYChart.Data<Double, Double>(2.9, 0.5))),
-   new LineChart.Series<Double, Double>("Series 2", FXCollections.observableArrayList(
-   new XYChart.Data<Double, Double>(0.0, 1.6), new XYChart.Data<Double, Double>(0.8, 0.4),
-   new XYChart.Data<Double, Double>(1.4, 2.9), new XYChart.Data<Double, Double>(2.1, 1.3),
-   new XYChart.Data<Double, Double>(2.6, 0.9))));
-   LineChart chart = new LineChart(xAxis, yAxis, lineChartData);
+  ObservableList<XYChart.Series<Double, Double>> lineChartData = FXCollections.observableArrayList(
+      new LineChart.Series<Double, Double>("Series 1", FXCollections.observableArrayList(
+          new XYChart.Data<Double, Double>(0.0, 1.0), new XYChart.Data<Double, Double>(1.2, 1.4),
+          new XYChart.Data<Double, Double>(2.2, 1.9), new XYChart.Data<Double, Double>(2.7, 2.3),
+          new XYChart.Data<Double, Double>(2.9, 0.5))),
+      new LineChart.Series<Double, Double>("Series 2", FXCollections.observableArrayList(
+          new XYChart.Data<Double, Double>(0.0, 1.6), new XYChart.Data<Double, Double>(0.8, 0.4),
+          new XYChart.Data<Double, Double>(1.4, 2.9), new XYChart.Data<Double, Double>(2.1, 1.3),
+          new XYChart.Data<Double, Double>(2.6, 0.9))));
+  LineChart chart = new LineChart(xAxis, yAxis, lineChartData);
 
   public static void main(String[] args) {
     launch(args);
@@ -157,7 +157,12 @@ public class Main extends Application {
     fileChooser.getExtensionFilters().add(new ExtensionFilter("CSV Files", "*.csv"));
 
     Button selectFileButton = new Button("Select File");
-    Scene loadScene = new Scene(selectFileButton, 1080, 720);
+
+    HBox loadSceneBox = new HBox(skipLoadButton, selectFileButton);
+
+
+
+    Scene loadScene = new Scene(loadSceneBox, 1080, 720);
 
     loadScene.getStylesheets().add("/application/application.css");
 
@@ -168,6 +173,22 @@ public class Main extends Application {
 
     Scene primaryScene = new Scene(testGridPane, 700, 700);
     primaryScene.getStylesheets().add("/application/application.css");
+
+    EventHandler<ActionEvent> skipButtonHandler = new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent event) {
+
+        primaryStage.setScene(primaryScene);
+
+        event.consume();
+      }
+    };
+
+    // this skip load button was required for a2 GUI.
+    
+    // "The layout is intuitive and clear to distinguish different functionality. User can get to
+    // main screen without having to load a data file."
+    skipLoadButton.setOnAction(skipButtonHandler);
 
     selectFileButton.setOnAction(e -> {
       runPrimaryView(cb2, cb3, cb4, primaryStage, cb, songs1, songs2, fileChooser, primaryScene,
@@ -360,7 +381,7 @@ public class Main extends Application {
         BorderPane borderPane = new BorderPane();
 
         borderPane.setBottom(goBackToPrimary);
-         borderPane.setCenter(chart);
+        borderPane.setCenter(chart);
 
 
         // HBox test123 = new HBox(chart, goBackToPrimary);
@@ -387,6 +408,8 @@ public class Main extends Application {
 
 
     goBackToPrimary.setOnAction(backButtonHandler);
+
+
 
     graphData.setOnAction(graphHandler);
 
@@ -541,27 +564,6 @@ public class Main extends Application {
 
 
     // Save file
-  }
-
-  public void ImageBarChartSample() {
-
-    String imageBarChartCss =
-        ImageBarChartSample.class.getResource("ImageBarChart.css").toExternalForm();
-
-    BarChart barChart = new BarChart(new CategoryAxis(), new NumberAxis());
-    barChart.setLegendVisible(false);
-    barChart.getStylesheets().add(imageBarChartCss);
-
-    barChart.getData()
-        .add(new XYChart.Series<String, Integer>("Sales Per Product",
-            FXCollections.observableArrayList(new XYChart.Data<String, Integer>("SUV", 120),
-                new XYChart.Data<String, Integer>("Sedan", 50),
-                new XYChart.Data<String, Integer>("Truck", 180),
-                new XYChart.Data<String, Integer>("Van", 20))));
-
-    graphScene = new Scene(barChart, 350, 300);
-    graphScene.getStylesheets()
-        .add(ImageBarChartSample.class.getResource("ImageBarChart.css").toString());
   }
 
 
