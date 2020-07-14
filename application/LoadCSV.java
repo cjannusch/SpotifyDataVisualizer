@@ -30,7 +30,7 @@ public class LoadCSV {
     Set<String> set = new HashSet<>(artistNames);
     artistNames.clear();
     artistNames.addAll(set);
-    
+
   }
 
 
@@ -65,6 +65,8 @@ public class LoadCSV {
     } catch (FileNotFoundException exception) {
       System.out.println("CSV file not found!");
     }
+
+//    System.out.println("Got to delimiter");
 
     if (scnr != null) {
 

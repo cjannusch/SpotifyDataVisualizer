@@ -145,6 +145,7 @@ public class Main extends Application {
 
     // --------------------------------------------
 
+//    new Thread(handler).start();  do something with running concurrently =) no idea what
 
     filterList(cb, songs1);
     filterList(cb2, songs2);
@@ -185,7 +186,7 @@ public class Main extends Application {
     };
 
     // this skip load button was required for a2 GUI.
-    
+
     // "The layout is intuitive and clear to distinguish different functionality. User can get to
     // main screen without having to load a data file."
     skipLoadButton.setOnAction(skipButtonHandler);
