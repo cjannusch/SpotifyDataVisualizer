@@ -6,9 +6,23 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.chart.*;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
@@ -22,17 +36,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
-import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.control.ComboBox;
 
 public class Main extends Application {
 
@@ -145,7 +148,7 @@ public class Main extends Application {
 
     // --------------------------------------------
 
-//    new Thread(handler).start();  do something with running concurrently =) no idea what
+    // new Thread(handler).start(); do something with running concurrently =) no idea what
 
     filterList(cb, songs1);
     filterList(cb2, songs2);
@@ -204,32 +207,51 @@ public class Main extends Application {
       Stage primaryStage, ComboBox<String> cb, ObservableList<String> songs,
       ObservableList<String> songs2, FileChooser fileChooser, Scene primaryScene,
       ObservableList<String> artists, ObservableList<String> artists2, Button graphData) {
+
     File selectedFile = fileChooser.showOpenDialog(primaryStage);
-    loadedCSV = new LoadCSV(selectedFile.toString());
 
-    for (int i = 0; i < loadedCSV.getSongArray().size(); i++) {
+    Task task = new Task<Void>() {
+      @Override
+      public void run() {
+        try {
+          loadedCSV = new LoadCSV(selectedFile.toString());
+        } catch (Exception ea) {
+          System.out.println("didn't load the CSV properly");
+        }
 
-      String tempSongName = loadedCSV.getSongArray().get(i).getName();
+        for (int i = 0; i < loadedCSV.getSongArray().size(); i++) {
 
-      if (tempSongName.length() >= 30)
-        tempSongName = tempSongName.substring(0, 30);
+          String tempSongName = loadedCSV.getSongArray().get(i).getName();
 
-      songs.add(tempSongName);
-      songs2.add(tempSongName);
-    }
+          if (tempSongName.length() >= 30)
+            tempSongName = tempSongName.substring(0, 30);
 
-    for (int i = 0; i < loadedCSV.getArtistNames().size(); i++) {
+          songs.add(tempSongName);
+          songs2.add(tempSongName);
+        }
 
-      String tempArtistName = loadedCSV.getArtistNames().get(i);
+        for (int i = 0; i < loadedCSV.getArtistNames().size(); i++) {
+
+          String tempArtistName = loadedCSV.getArtistNames().get(i);
 
 
-      // some song names are super long and mess up spacing of the VBoxes
-      if (tempArtistName.length() >= 30)
-        tempArtistName = tempArtistName.substring(0, 30);
+          // some song names are super long and mess up spacing of the VBoxes
+          if (tempArtistName.length() >= 30)
+            tempArtistName = tempArtistName.substring(0, 30);
 
-      artists.add(tempArtistName);
-      artists2.add(tempArtistName);
-    }
+          artists.add(tempArtistName);
+          artists2.add(tempArtistName);
+        }
+        return;
+      }
+
+      @Override
+      protected Void call() throws Exception {
+        // TODO Auto-generated method stub.
+        return null;
+      }
+    };
+    new Thread(task).start();
 
     printOut.setOnAction(action -> {
       outputFileName = outputFileField.getText() + ".txt";

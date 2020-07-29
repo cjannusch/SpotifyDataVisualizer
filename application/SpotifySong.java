@@ -247,7 +247,7 @@ public class SpotifySong {
       // this.artists[0] = inputArray[1];
     }
     // System.out.println(Arrays.deepToString(this.artists));
-    // System.out.println(Arrays.deepToString(inputArray));
+//     System.out.println(Arrays.deepToString(inputArray));
 
     this.acousticness = Double.parseDouble(inputArray[0]);
 
