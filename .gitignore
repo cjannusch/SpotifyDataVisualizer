@@ -1,2 +1,7 @@
 /bin/
 /output/
+*/testCSVSMALL.csv
+*/testCSVMEDIUM.csv
+*/testCSVBIG.csv
+MANIFEST.txt
+SpotifyApp.jar

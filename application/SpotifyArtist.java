@@ -2,6 +2,8 @@ package application;
 
 import java.util.ArrayList;
 
+
+//Is the data type that contains the meta-data for a specific Spotify Artist
 public class SpotifyArtist {
 
 //  private String artists = "N/A"; // only used for printing to List in Main
@@ -62,7 +64,7 @@ public class SpotifyArtist {
     this.tempo = tempTempo / songArray.size();
     this.valence = tempValence / songArray.size();
 
-    System.out.println(this.toStringExtended());
+//    System.out.println(this.toStringExtended());
 
   }
 

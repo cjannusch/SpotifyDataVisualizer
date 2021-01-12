@@ -5,6 +5,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.InputMismatchException;
+import java.util.Random;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -18,16 +20,14 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -36,10 +36,12 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 
 public class Main extends Application {
 
-  LoadCSV loadedCSV;
+  private LoadCSV loadedCSV;
   private String artistToGraph1;
   private String artistToGraph2;
   private String songToGraph1;
@@ -50,35 +52,43 @@ public class Main extends Application {
   private SpotifyArtist SpotifyArtist2;
   private SpotifySong SpotifySong1;
   private SpotifySong SpotifySong2;
-  // private ArrayList<SpotifySong> incorrectArtistList1 = new ArrayList<SpotifySong>();
-  // private ArrayList<SpotifySong> incorrectArtistList2 = new ArrayList<SpotifySong>();
-  TextField outputFileField = new TextField("output");
-  Button printOut = new Button("Print Selection to Text File");
-  String outputFileName = "";
-  ArrayList<String> textToBeWritten = new ArrayList<String>();
+  private TextField outputFileField = new TextField("output");
+  private Button printOut = new Button("Print Selection to Text File");
+  private String outputFileName = "";
+  private ArrayList<String> textToBeWritten = new ArrayList<String>();
+  private Button goBackToPrimary = new Button("Back");
+  private Button skipLoadButton = new Button("Skip loading data");
 
-  GridPane graphGridPane = new GridPane();
-  Scene graphScene = new Scene(graphGridPane, 1080, 720);
-  Button goBackToPrimary = new Button("Back");
-  Button skipLoadButton = new Button("Skip loading data");
+  // check Boxes
 
-  // chart stuff
+  private CheckBox danceabilityCheckBox = new CheckBox("Sort by Danceability");
+  private CheckBox energyCheckBox = new CheckBox("Sort by Energy");
+  private CheckBox livenessCheckBox = new CheckBox("Sort by Liveness");
+  private CheckBox popularityCheckBox = new CheckBox("Sort by Popularity");
+  private CheckBox tempoCheckBox = new CheckBox("Sort by Tempo");
+  private CheckBox valenceCheckBox = new CheckBox("Sort by Valence");
 
-  NumberAxis xAxis = new NumberAxis("Values for X-Axis", 0, 3, 1);
-  NumberAxis yAxis = new NumberAxis("Values for Y-Axis", 0, 3, 1);
+  // layout for primary view
 
-  // line chart example
+  private VBox col1;
+  private VBox col2;
+  private Button findSimilarButton;
+  private Scene loadScene;
 
-  ObservableList<XYChart.Series<Double, Double>> lineChartData = FXCollections.observableArrayList(
-      new LineChart.Series<Double, Double>("Series 1", FXCollections.observableArrayList(
-          new XYChart.Data<Double, Double>(0.0, 1.0), new XYChart.Data<Double, Double>(1.2, 1.4),
-          new XYChart.Data<Double, Double>(2.2, 1.9), new XYChart.Data<Double, Double>(2.7, 2.3),
-          new XYChart.Data<Double, Double>(2.9, 0.5))),
-      new LineChart.Series<Double, Double>("Series 2", FXCollections.observableArrayList(
-          new XYChart.Data<Double, Double>(0.0, 1.6), new XYChart.Data<Double, Double>(0.8, 0.4),
-          new XYChart.Data<Double, Double>(1.4, 2.9), new XYChart.Data<Double, Double>(2.1, 1.3),
-          new XYChart.Data<Double, Double>(2.6, 0.9))));
-  LineChart chart = new LineChart(xAxis, yAxis, lineChartData);
+  // combo boxes for artists and songs display
+
+  private ComboBox<String> songBox1 = new ComboBox<String>();
+  private ComboBox<String> songBox2 = new ComboBox<String>();
+  private ComboBox<String> artistBox1 = new ComboBox<String>();
+  private ComboBox<String> artistBox2 = new ComboBox<String>();
+
+  // combobox setup requires ObervableLists for sorting
+
+  private ObservableList<String> songs1 = FXCollections.observableArrayList();
+  private ObservableList<String> songs2 = FXCollections.observableArrayList();
+  private ObservableList<String> artists1 = FXCollections.observableArrayList();
+  private ObservableList<String> artists2 = FXCollections.observableArrayList();
+
 
   public static void main(String[] args) {
     launch(args);
@@ -87,7 +97,6 @@ public class Main extends Application {
   @Override
   public void start(Stage primaryStage) throws Exception {
     primaryStage.setTitle("Spotify Data Visualizer");
-    // primaryStage.initStyle(StageStyle.UTILITY);
     primaryStage.getIcons().add(new Image("spotifyImageCustom.png"));
 
     // setup for grid pane
@@ -96,41 +105,29 @@ public class Main extends Application {
     Label artist1 = new Label("Artist 1:");
     Label song2 = new Label("Song 2:");
     Label artist2 = new Label("Artist 2:");
-    // Button findSimilarSong = new Button("Find Similar Song");
-    // Button findSimilarArtist = new Button("Find Similar Artist");
     Label data1 = new Label("Data for song/artist 1:");
     Label data2 = new Label("Data for song/artist 2:");
-    Button graphData = new Button("Graph Data");
+    findSimilarButton = new Button("Find Similar");
     Label outputFileNameLabel = new Label("File Name To Output To:");
-
 
     // css styling!!
     outputFileNameLabel.setStyle("-fx-padding: 14 0 0 0;");
     listView1.setStyle("-fx-background-color: BLACK;");
     listView2.setStyle("-fx-background-color: BLACK;");
 
-    // combobox setup requires ObervableLists for sorting
-
-    ComboBox<String> cb = new ComboBox<String>();
-    ComboBox<String> cb2 = new ComboBox<String>();
-    ComboBox<String> cb3 = new ComboBox<String>();
-    ComboBox<String> cb4 = new ComboBox<String>();
-    cb.setEditable(true);
-    cb2.setEditable(true);
-    cb3.setEditable(true);
-    cb4.setEditable(true);
-    ObservableList<String> songs1 = FXCollections.observableArrayList();
-    ObservableList<String> songs2 = FXCollections.observableArrayList();
-    ObservableList<String> artists1 = FXCollections.observableArrayList();
-    ObservableList<String> artists2 = FXCollections.observableArrayList();
-
-
-    // test Gridpane with vBoxes
+    // sets the boxes to accept input for sorting
+    songBox1.setEditable(true);
+    songBox2.setEditable(true);
+    artistBox1.setEditable(true);
+    artistBox2.setEditable(true);
 
     GridPane testGridPane = new GridPane();
 
-    VBox col1 = new VBox(song1, cb, artist1, cb3, outputFileNameLabel, data1, listView1, graphData);
-    VBox col2 = new VBox(song2, cb2, artist2, cb4, outputFileField, data2, listView2, printOut);
+    col1 = new VBox(song1, songBox1, artist1, artistBox1, outputFileNameLabel, data1, listView1,
+        danceabilityCheckBox, energyCheckBox, tempoCheckBox, findSimilarButton);
+    col2 = new VBox(song2, songBox2, artist2, artistBox2, outputFileField, data2, listView2,
+        livenessCheckBox, popularityCheckBox, valenceCheckBox, printOut);
+
     data2.setAlignment(Pos.BOTTOM_LEFT);
     col1.setSpacing(20);
     col2.setSpacing(20);
@@ -139,23 +136,13 @@ public class Main extends Application {
     testGridPane.add(col1, 0, 0, 1, 1);
     testGridPane.add(col2, 1, 0, 1, 1);
 
-    // debugging layout line since im lazy like that
-    // testGridPane.setGridLinesVisible(true);
-
     ColumnConstraints constraint = new ColumnConstraints();
     constraint.setHgrow(Priority.ALWAYS);
     testGridPane.getColumnConstraints().add(constraint);
 
     // --------------------------------------------
 
-    // new Thread(handler).start(); do something with running concurrently =) no idea what
-
-    filterList(cb, songs1);
-    filterList(cb2, songs2);
-    filterList(cb3, artists1);
-    filterList(cb4, artists2);
-
-
+    // can only accept CSV files
 
     FileChooser fileChooser = new FileChooser();
     fileChooser.getExtensionFilters().add(new ExtensionFilter("CSV Files", "*.csv"));
@@ -164,18 +151,13 @@ public class Main extends Application {
 
     HBox loadSceneBox = new HBox(skipLoadButton, selectFileButton);
 
-
-
-    Scene loadScene = new Scene(loadSceneBox, 1080, 720);
+    loadScene = new Scene(loadSceneBox, 1080, 720);
 
     loadScene.getStylesheets().add("/application/application.css");
-
     primaryStage.setScene(loadScene);
     primaryStage.show();
 
-
-
-    Scene primaryScene = new Scene(testGridPane, 700, 700);
+    Scene primaryScene = new Scene(testGridPane, 700, 900);
     primaryScene.getStylesheets().add("/application/application.css");
 
     EventHandler<ActionEvent> skipButtonHandler = new EventHandler<ActionEvent>() {
@@ -188,36 +170,35 @@ public class Main extends Application {
       }
     };
 
-    // this skip load button was required for a2 GUI.
-
-    // "The layout is intuitive and clear to distinguish different functionality. User can get to
-    // main screen without having to load a data file."
     skipLoadButton.setOnAction(skipButtonHandler);
 
     selectFileButton.setOnAction(e -> {
-      runPrimaryView(cb2, cb3, cb4, primaryStage, cb, songs1, songs2, fileChooser, primaryScene,
-          artists1, artists2, graphData);
+
+      try {
+        runPrimaryView(primaryStage, fileChooser, primaryScene, findSimilarButton);
+      } catch (InputMismatchException e1) {
+        Alert badInput = new Alert(AlertType.CONFIRMATION);
+        badInput.show();
+        primaryStage.setScene(loadScene);
+        primaryStage.show();
+      }
     });
-
-
 
   }
 
-  private void runPrimaryView(ComboBox<String> cb2, ComboBox<String> cb3, ComboBox<String> cb4,
-      Stage primaryStage, ComboBox<String> cb, ObservableList<String> songs,
-      ObservableList<String> songs2, FileChooser fileChooser, Scene primaryScene,
-      ObservableList<String> artists, ObservableList<String> artists2, Button graphData) {
+  private void runPrimaryView(Stage primaryStage, FileChooser fileChooser, Scene primaryScene,
+      Button findSimilar) throws InputMismatchException {
 
     File selectedFile = fileChooser.showOpenDialog(primaryStage);
 
-    Task task = new Task<Void>() {
+
+    // does the data input as a task on a different thread, this was in hopes to stop the JavaFX
+    // thread from crashing as with big enough data sets the program would go unresponsive
+    Task<Void> loadData = new Task<Void>() {
       @Override
       public void run() {
-        try {
-          loadedCSV = new LoadCSV(selectedFile.toString());
-        } catch (Exception ea) {
-          System.out.println("didn't load the CSV properly");
-        }
+
+        loadedCSV = new LoadCSV(selectedFile.toString());
 
         for (int i = 0; i < loadedCSV.getSongArray().size(); i++) {
 
@@ -226,7 +207,7 @@ public class Main extends Application {
           if (tempSongName.length() >= 30)
             tempSongName = tempSongName.substring(0, 30);
 
-          songs.add(tempSongName);
+          songs1.add(tempSongName);
           songs2.add(tempSongName);
         }
 
@@ -239,19 +220,30 @@ public class Main extends Application {
           if (tempArtistName.length() >= 30)
             tempArtistName = tempArtistName.substring(0, 30);
 
-          artists.add(tempArtistName);
+          artists1.add(tempArtistName);
           artists2.add(tempArtistName);
         }
+
+        filterList(songBox1, songs1);
+        filterList(songBox2, songs2);
+        filterList(artistBox1, artists1);
+        filterList(artistBox2, artists2);
+
+        loadedCSV.loadArtistData();
+
         return;
       }
 
+      // never used but required to compile
       @Override
       protected Void call() throws Exception {
-        // TODO Auto-generated method stub.
         return null;
       }
     };
-    new Thread(task).start();
+
+    Thread loadThread = new Thread(loadData);
+
+    loadThread.start();
 
     printOut.setOnAction(action -> {
       outputFileName = outputFileField.getText() + ".txt";
@@ -263,30 +255,42 @@ public class Main extends Application {
         textToBeWritten.add("You saved the song: " + SpotifySong2.getName() + " by: "
             + Arrays.deepToString(SpotifySong2.getArtists()));
       }
-
     });
-
 
     // combobox for song1, doesn't allow comparing a song to an artist
 
-    cb.valueProperty().addListener(new ChangeListener<String>() {
+    songBox1.valueProperty().addListener(new ChangeListener<String>() {
       @Override
       public void changed(ObservableValue ov, String t, String t1) {
+
+        if (t1 == null)
+          return;
+
         songToGraph1 = t1;
 
         if (artistToGraph1 != null) {
           artistToGraph1 = null;
           SpotifyArtist1 = null;
+          artistBox1.getSelectionModel().clearSelection();
         }
 
         if (artistToGraph2 != null) {
           artistToGraph2 = null;
           SpotifyArtist2 = null;
+          artistBox2.getSelectionModel().clearSelection();
         }
 
         // convert string song to actual Spotify Song
 
         for (int i = 0; i < loadedCSV.getSongArray().size(); i++) {
+
+          if (songToGraph1.length() == 30) {
+
+            if (loadedCSV.getSongArray().get(i).getName().contains(songToGraph1)) {
+              SpotifySong1 = loadedCSV.getSongArray().get(i);
+            }
+
+          }
 
           if (loadedCSV.getSongArray().get(i).getName().equals(songToGraph1)) {
             SpotifySong1 = loadedCSV.getSongArray().get(i);
@@ -295,31 +299,45 @@ public class Main extends Application {
 
         checkSelections();
 
-        System.out.println("Song1: " + songToGraph1);
+        // System.out.println("Song1: " + songToGraph1);
       }
     });
 
-    // combobox for artist1, doesn't allow comparing a song to a song
+    // combobox for song2, doesn't allow comparing a song to a artist
 
-    cb2.valueProperty().addListener(new ChangeListener<String>() {
+    songBox2.valueProperty().addListener(new ChangeListener<String>() {
       @Override
       public void changed(ObservableValue ov, String t, String t1) {
+
+        if (t1 == null)
+          return;
+
         songToGraph2 = t1;
 
         if (artistToGraph1 != null) {
           artistToGraph1 = null;
           SpotifyArtist1 = null;
+          artistBox1.getSelectionModel().clearSelection();
         }
 
         if (artistToGraph2 != null) {
           artistToGraph2 = null;
           SpotifyArtist2 = null;
+          artistBox2.getSelectionModel().clearSelection();
         }
 
 
         // convert string song to actual Spotify Song
 
         for (int i = 0; i < loadedCSV.getSongArray().size(); i++) {
+
+          if (songToGraph2.length() == 30) {
+
+            if (loadedCSV.getSongArray().get(i).getName().contains(songToGraph2)) {
+              SpotifySong2 = loadedCSV.getSongArray().get(i);
+            }
+
+          }
 
           if (loadedCSV.getSongArray().get(i).getName().equals(songToGraph2)) {
             SpotifySong2 = loadedCSV.getSongArray().get(i);
@@ -328,25 +346,31 @@ public class Main extends Application {
 
         checkSelections();
 
-        System.out.println("Song2: " + songToGraph2);
+        // System.out.println("Song2: " + songToGraph2);
       }
     });
 
-    // combobox for song2, doesn't allow comparing a song to an artist
+    // combobox for artist1, doesn't allow comparing a song to an artist
 
-    cb3.valueProperty().addListener(new ChangeListener<String>() {
+    artistBox1.valueProperty().addListener(new ChangeListener<String>() {
       @Override
       public void changed(ObservableValue ov, String t, String t1) {
+
+        if (t1 == null)
+          return;
+
         artistToGraph1 = t1;
 
         if (songToGraph1 != null) {
           songToGraph1 = null;
           SpotifySong1 = null;
+          songBox1.getSelectionModel().clearSelection();
         }
 
         if (songToGraph2 != null) {
           songToGraph2 = null;
           SpotifySong2 = null;
+          songBox2.getSelectionModel().clearSelection();
         }
 
         listView1.getItems().clear();
@@ -358,25 +382,31 @@ public class Main extends Application {
 
         checkSelections();
 
-        System.out.println("Artist1: " + artistToGraph1);
+        // System.out.println("Artist1: " + artistToGraph1);
       }
     });
 
     // combobox for artist2, doesn't allow comparing a song to a song
 
-    cb4.valueProperty().addListener(new ChangeListener<String>() {
+    artistBox2.valueProperty().addListener(new ChangeListener<String>() {
       @Override
       public void changed(ObservableValue ov, String t, String t1) {
+
+        if (t1 == null)
+          return;
+
         artistToGraph2 = t1;
 
         if (songToGraph1 != null) {
           songToGraph1 = null;
           SpotifySong1 = null;
+          songBox1.getSelectionModel().clearSelection();
         }
 
         if (songToGraph2 != null) {
           songToGraph2 = null;
           SpotifySong2 = null;
+          songBox2.getSelectionModel().clearSelection();
         }
 
         listView2.getItems().clear();
@@ -388,36 +418,10 @@ public class Main extends Application {
 
         checkSelections();
 
-        System.out.println("Artist2: " + artistToGraph2);
+        // System.out.println("Artist2: " + artistToGraph2);
       }
     });
 
-    // TODO still need to do this buttonHandler
-
-    EventHandler<ActionEvent> graphHandler = new EventHandler<ActionEvent>() {
-      @Override
-      public void handle(ActionEvent event) {
-        // System.out.print("songToGraph1: " + songToGraph1 + "\n" + "songToGraph2: " + songToGraph2
-        // + "\n" + "artistToGraph1: " + artistToGraph1 + "\n" + "artistToGraph1: "
-        // + artistToGraph2 + "\n");
-
-        BorderPane borderPane = new BorderPane();
-
-        borderPane.setBottom(goBackToPrimary);
-        borderPane.setCenter(chart);
-
-
-        // HBox test123 = new HBox(chart, goBackToPrimary);
-
-        Scene testGraph = new Scene(borderPane, 1080, 720);
-
-        primaryStage.setScene(testGraph);
-
-
-
-        event.consume();
-      }
-    };
 
     EventHandler<ActionEvent> backButtonHandler = new EventHandler<ActionEvent>() {
       @Override
@@ -429,18 +433,42 @@ public class Main extends Application {
       }
     };
 
+    EventHandler<ActionEvent> findSimilarButtonHandler = new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent event) {
+
+        checkSelections();
+
+
+        if (songToGraph1 != null && artistToGraph1 == null) {
+
+          SpotifySong2 = findSimilarSong(SpotifySong1);
+
+          checkSelections();
+
+        }
+
+        if (artistToGraph1 != null && songToGraph1 == null) {
+
+          SpotifyArtist2 = findSimilarArtist(SpotifyArtist1);
+
+          checkSelections();
+
+        }
+
+      }
+    };
+
+    findSimilarButton.setOnAction(findSimilarButtonHandler);
 
     goBackToPrimary.setOnAction(backButtonHandler);
 
-
-
-    graphData.setOnAction(graphHandler);
-
-
     primaryStage.setScene(primaryScene);
     primaryStage.show();
+
   }
 
+  // Taken from here, given a big data set the box takes a while to load so this helps.
   // https://stackoverflow.com/a/34609439
 
   private void filterList(ComboBox<String> cb, ObservableList<String> songs) {
@@ -477,6 +505,9 @@ public class Main extends Application {
     cb.setItems(filteredItems);
   }
 
+
+  // checks the boxes to see if if a song versus an artist is being compared and resets the fields
+  // to be empty to avoid a cluttered UI.
   private void checkSelections() {
 
     listView1.getItems().clear();
@@ -555,19 +586,18 @@ public class Main extends Application {
         listView2.getItems().add("Explicit: Yes");
       } else
         listView2.getItems().add("Explicit: No");
-
-
     }
 
 
   }
 
+
+  // overrides the JavaFX stop method, this will write all of the cached output lines to a text file
+  // of a given name
   @Override
   public void stop() {
-    System.out.println("Stage is closing");
-
-
-
+    // should only get here if the user decides to remove the output.txt name and forgets to input a
+    // new name.
     if (outputFileName.equals(""))
       outputFileName = "YouForgotToSetAFileNameSilly.txt";
 
@@ -581,12 +611,221 @@ public class Main extends Application {
       writer.close();
 
     } catch (IOException exception) {
+      exception.printStackTrace();
+    }
+  }
 
+
+  // finds a similar song for the given song1. I'm pretty proud of how this whole method came
+  // together =) Picks randomly from a list of similar Songs.
+  private SpotifySong findSimilarSong(SpotifySong songToFindFor) {
+
+    listView2.getItems().clear();
+    SpotifyArtist2 = null;
+    SpotifySong2 = null;
+
+    boolean compareByDanceability = danceabilityCheckBox.isSelected();
+    boolean compareByEnergy = energyCheckBox.isSelected();
+    boolean compareByLiveness = livenessCheckBox.isSelected();
+    boolean compareByPopularity = popularityCheckBox.isSelected();
+    boolean compareByTempo = tempoCheckBox.isSelected();
+    boolean compareByValence = valenceCheckBox.isSelected();
+
+    ArrayList<SpotifySong> matchingSongs = new ArrayList();
+
+    for (int i = 0; i < loadedCSV.getSongArray().size(); i++) {
+
+      SpotifySong songToCompare = loadedCSV.getSongArray().get(i);
+
+      while (compareByDanceability || compareByEnergy || compareByLiveness || compareByPopularity
+          || compareByTempo || compareByValence) {
+
+        if (compareByDanceability) {
+
+          if (Math.abs(songToFindFor.getDanceability() - songToCompare.getDanceability()) >= .05) {
+            break;
+          }
+
+        }
+
+        if (compareByEnergy) {
+
+          if (Math.abs(songToFindFor.getEnergy() - songToCompare.getEnergy()) >= .05) {
+            break;
+          }
+
+        }
+
+        if (compareByLiveness) {
+
+          if (Math.abs(songToFindFor.getLiveness() - songToCompare.getLiveness()) >= .05) {
+            break;
+          }
+
+        }
+
+        if (compareByPopularity) {
+
+          if (Math.abs(songToFindFor.getPopularity() - songToCompare.getPopularity()) >= 20) {
+            break;
+          }
+
+        }
+
+        if (compareByTempo) {
+
+          if (Math.abs(songToFindFor.getTempo() - songToCompare.getTempo()) >= 20) {
+            break;
+          }
+
+        }
+
+        if (compareByValence) {
+
+          if (Math.abs(songToFindFor.getValence() - songToCompare.getValence()) >= .1) {
+            break;
+          }
+
+        }
+
+        matchingSongs.add(songToCompare);
+        break;
+
+      }
     }
 
 
+    if (matchingSongs.size() == 0)
+      return null;
 
-    // Save file
+    Random randGen = new Random();
+    int index = randGen.nextInt(matchingSongs.size());
+
+    if (matchingSongs.get(index).getName().equals(SpotifySong1.getName()))
+      index = (index + 1) % matchingSongs.size();
+
+
+    Alert testFeedback = new Alert(AlertType.INFORMATION);
+    testFeedback.setContentText(
+        "there were: " + (matchingSongs.size() - 1) + " matches, so i picked a random one for you");
+
+    if (matchingSongs.size() == 1)
+      testFeedback.setContentText(
+          "there were: " + (matchingSongs.size() - 1) + " matches, try unchecking a sorting box");
+
+    testFeedback.showAndWait().ifPresent(rs -> {
+      if (rs == ButtonType.OK) {
+      }
+    });
+
+    return matchingSongs.get(index);
+  }
+
+
+  // finds a similar song for the given artist1. Picks randomly from a list of similar artists.
+  private SpotifyArtist findSimilarArtist(SpotifyArtist artistToFindFor) {
+
+    listView2.getItems().clear();
+    SpotifyArtist2 = null;
+    SpotifySong2 = null;
+
+    boolean compareByDanceability = danceabilityCheckBox.isSelected();
+    boolean compareByEnergy = energyCheckBox.isSelected();
+    boolean compareByLiveness = livenessCheckBox.isSelected();
+    boolean compareByPopularity = popularityCheckBox.isSelected();
+    boolean compareByTempo = tempoCheckBox.isSelected();
+    boolean compareByValence = valenceCheckBox.isSelected();
+
+    ArrayList<SpotifyArtist> matchingArtists = new ArrayList();
+
+    for (int i = 0; i < loadedCSV.getArtistArray().size(); i++) {
+
+      SpotifyArtist artistToCompare = loadedCSV.getArtistArray().get(i);
+
+      while (compareByDanceability || compareByEnergy || compareByLiveness || compareByPopularity
+          || compareByTempo || compareByValence) {
+
+        if (compareByDanceability) {
+
+          if (Math
+              .abs(artistToFindFor.getDanceability() - artistToCompare.getDanceability()) >= .10) {
+            break;
+          }
+
+        }
+
+        if (compareByEnergy) {
+
+          if (Math.abs(artistToFindFor.getEnergy() - artistToCompare.getEnergy()) >= .10) {
+            break;
+          }
+
+        }
+
+        if (compareByLiveness) {
+
+          if (Math.abs(artistToFindFor.getLiveness() - artistToCompare.getLiveness()) >= .10) {
+            break;
+          }
+
+        }
+
+        if (compareByPopularity) {
+
+          if (Math.abs(artistToFindFor.getPopularity() - artistToCompare.getPopularity()) >= 10) {
+            break;
+          }
+
+        }
+
+        if (compareByTempo) {
+
+          if (Math.abs(artistToFindFor.getTempo() - artistToCompare.getTempo()) >= 4) {
+            break;
+          }
+
+        }
+
+        if (compareByValence) {
+
+          if (Math.abs(artistToFindFor.getValence() - artistToCompare.getValence()) >= .10) {
+            break;
+          }
+
+        }
+
+        matchingArtists.add(artistToCompare);
+        break;
+
+      }
+    }
+
+
+    if (matchingArtists.size() == 0) {
+      System.out.println("found nothing");
+      return null;
+    }
+
+    Random randGen = new Random();
+    int index = randGen.nextInt(matchingArtists.size());
+
+    if (matchingArtists.get(index).getName().equals(SpotifyArtist1.getName()))
+      index = (index + 1) % matchingArtists.size();
+
+    Alert testFeedback = new Alert(AlertType.INFORMATION);
+    testFeedback.setContentText("there were: " + (matchingArtists.size() - 1)
+        + " matches, so i picked a random one for you");
+
+    if (matchingArtists.size() == 1)
+      testFeedback.setContentText(
+          "there were: " + (matchingArtists.size() - 1) + " matches, try unchecking a sorting box");
+
+    testFeedback.showAndWait().ifPresent(rs -> {
+      if (rs == ButtonType.OK) {
+      }
+    });
+
+    return matchingArtists.get(index);
   }
 
 

@@ -1,6 +1,9 @@
 package application;
 
 import java.util.Arrays;
+import java.util.InputMismatchException;
+
+//Is the data type that contains the meta-data for a specific Spotify Song
 
 /**
  * TODO Put here a description of what this class does.
@@ -202,115 +205,111 @@ public class SpotifySong {
   }
 
 
-  public SpotifySong(String inputLine) {
-    String artistsString = null;
+  public SpotifySong(String inputLine) throws InputMismatchException {
 
-    if (inputLine.contains("  ")) {
-      int startPos = inputLine.indexOf("[");
-      int endPos = inputLine.lastIndexOf("]");
 
-      artistsString = inputLine.substring(startPos, endPos + 1);
-      // artistsString = artistsString.substring(3, artistsString.length() - 3);
-      artistsString = artistsString.replace('[', '\0');
-      artistsString = artistsString.replace(']', '\0');
-      artistsString = artistsString.replace('\'', '\0');
-      artistsString = artistsString.trim();
-      // System.out.println(artistsString);
-      this.artists = artistsString.split("  ");
-      // System.out.println(Arrays.deepToString(this.artists));
-      StringBuffer newInputLine = new StringBuffer(inputLine);
-      newInputLine.replace(startPos, endPos + 2, "");
-      inputLine = newInputLine.toString();
-      // System.out.println(inputLine);
-    }
+    try {
 
-    String[] inputArray = inputLine.split(",");
+      String artistsString = null;
 
-    // System.out.println(inputLine);
+      if (inputLine.contains("  ")) {
+        int startPos = inputLine.indexOf("[");
+        int endPos = inputLine.lastIndexOf("]");
 
-    if (artistsString != null) {
-      String[] fillerInputArray = new String[20];
-      for (int i = 1; i < inputArray.length; i++) {
-        fillerInputArray[i + 1] = inputArray[i];
+        artistsString = inputLine.substring(startPos, endPos + 1);
+        artistsString = artistsString.replace('[', '\0');
+        artistsString = artistsString.replace(']', '\0');
+        artistsString = artistsString.replace('\'', '\0');
+        artistsString = artistsString.trim();
+        this.artists = artistsString.split("  ");
+        StringBuffer newInputLine = new StringBuffer(inputLine);
+        newInputLine.replace(startPos, endPos + 2, "");
+        inputLine = newInputLine.toString();
       }
-      fillerInputArray[0] = inputArray[0];
-      fillerInputArray[1] = "MULTIPLE ARTISTS";
-      inputArray = fillerInputArray;
-      // System.out.println(Arrays.deepToString(inputArray));
-      // System.out.println(artistsString);
-      // this.artists = artistsString.split(",");
-      for (int i = 0; i < artists.length; i++) {
-        this.artists[i] = this.artists[i].trim();
+
+      String[] inputArray = inputLine.split(",");
+
+      if (artistsString != null) {
+        String[] fillerInputArray = new String[20];
+        for (int i = 1; i < inputArray.length; i++) {
+          fillerInputArray[i + 1] = inputArray[i];
+        }
+        fillerInputArray[0] = inputArray[0];
+        fillerInputArray[1] = "MULTIPLE ARTISTS";
+        inputArray = fillerInputArray;
+
+        for (int i = 0; i < artists.length; i++) {
+          this.artists[i] = this.artists[i].trim();
+        }
+      } else {
+        this.artists = new String[] {inputArray[1].substring(2, inputArray[1].length() - 2)};
       }
-    } else {
-      this.artists = new String[] {inputArray[1].substring(2, inputArray[1].length() - 2)};
-      // this.artists[0] = inputArray[1];
+
+
+      this.acousticness = Double.parseDouble(inputArray[0]);
+
+
+      this.danceability = Double.parseDouble(inputArray[2]);
+
+
+
+      // System.out.println(inputArray.toString());
+      this.duration_ms = Integer.parseInt(inputArray[3]);
+      this.energy = Double.parseDouble(inputArray[4]);
+      this.explicit = false;
+      if (inputArray[5].contains("1"))
+        this.explicit = true;
+
+
+      this.id = inputArray[6];
+      this.instrumentalness = Double.parseDouble(inputArray[7]);
+
+
+      // pretty sure a switch statement is faster than ifs in this case
+      switch (Integer.parseInt(inputArray[8])) {
+
+        case 0:
+          this.key = "C";
+        case 1:
+          this.key = "C#";
+        case 2:
+          this.key = "D";
+        case 3:
+          this.key = "D#";
+        case 4:
+          this.key = "E";
+        case 5:
+          this.key = "F";
+        case 6:
+          this.key = "F#";
+        case 7:
+          this.key = "G";
+        case 8:
+          this.key = "G#";
+        case 9:
+          this.key = "A";
+        case 10:
+          this.key = "A#";
+        case 11:
+          this.key = "B";
+      }
+
+      this.liveness = Double.parseDouble(inputArray[9]);
+      this.loudness = Double.parseDouble(inputArray[10]);
+
+      this.mode = Integer.parseInt(inputArray[11]); // 0=minor 1=major
+      this.name = inputArray[12];
+      this.popularity = Integer.parseInt(inputArray[13]);
+      this.release_date = inputArray[14];
+      this.speechiness = Double.parseDouble(inputArray[15]);
+      this.tempo = Double.parseDouble(inputArray[16]);
+      this.valence = Double.parseDouble(inputArray[17]);
+      this.year = Integer.parseInt(inputArray[18]);
+
+    } catch (Exception erethang) {
+      throw new InputMismatchException();
     }
-    // System.out.println(Arrays.deepToString(this.artists));
-//     System.out.println(Arrays.deepToString(inputArray));
 
-    this.acousticness = Double.parseDouble(inputArray[0]);
-
-
-    this.danceability = Double.parseDouble(inputArray[2]);
-
-
-
-    // System.out.println(inputArray.toString());
-    this.duration_ms = Integer.parseInt(inputArray[3]);
-    this.energy = Double.parseDouble(inputArray[4]);
-    this.explicit = false;
-    if (inputArray[5].contains("1"))
-      this.explicit = true;
-
-
-    this.id = inputArray[6];
-    this.instrumentalness = Double.parseDouble(inputArray[7]);
-
-
-    // pretty sure a switch statement is faster than ifs in this case
-    switch (Integer.parseInt(inputArray[8])) {
-
-      case 0:
-        this.key = "C";
-      case 1:
-        this.key = "C#";
-      case 2:
-        this.key = "D";
-      case 3:
-        this.key = "D#";
-      case 4:
-        this.key = "E";
-      case 5:
-        this.key = "F";
-      case 6:
-        this.key = "F#";
-      case 7:
-        this.key = "G";
-      case 8:
-        this.key = "G#";
-      case 9:
-        this.key = "A";
-      case 10:
-        this.key = "A#";
-      case 11:
-        this.key = "B";
-    }
-
-    this.liveness = Double.parseDouble(inputArray[9]);
-    this.loudness = Double.parseDouble(inputArray[10]);
-
-    this.mode = Integer.parseInt(inputArray[11]); // 0=minor 1=major
-    this.name = inputArray[12];
-    this.popularity = Integer.parseInt(inputArray[13]);
-    this.release_date = inputArray[14];
-    this.speechiness = Double.parseDouble(inputArray[15]);
-    this.tempo = Double.parseDouble(inputArray[16]);
-    this.valence = Double.parseDouble(inputArray[17]);
-    this.year = Integer.parseInt(inputArray[18]);
-
-    // System.out.println(Arrays.deepToString(inputArray));
-    // System.out.println(this.toString());
   }
 
   @Override

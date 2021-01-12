@@ -4,14 +4,17 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 import java.util.Set;
+
 
 
 public class LoadCSV {
 
   private ArrayList<SpotifySong> songArray;
   private ArrayList<String> artistNames = new ArrayList<String>();
+  private ArrayList<SpotifyArtist> artistArray = new ArrayList<SpotifyArtist>();
 
   public LoadCSV(String fileName) {
     this.songArray = this.loadData(new File(fileName));
@@ -31,6 +34,29 @@ public class LoadCSV {
     artistNames.clear();
     artistNames.addAll(set);
 
+  }
+
+  public void loadArtistData() {
+
+    for (int i = 0; (i < artistNames.size()); i++) {
+
+      artistArray
+          .add(new SpotifyArtist(artistNames.get(i), searchByArtistName(artistNames.get(i))));
+//      System.out.println("added an artist + " + i);
+
+    }
+
+    return;
+  }
+
+
+  /**
+   * Returns the value of the field called 'artistArray'.
+   * 
+   * @return Returns the artistArray.
+   */
+  public ArrayList<SpotifyArtist> getArtistArray() {
+    return this.artistArray;
   }
 
 
@@ -55,7 +81,7 @@ public class LoadCSV {
 
 
 
-  public ArrayList<SpotifySong> loadData(File fileName) {
+  public ArrayList<SpotifySong> loadData(File fileName) throws InputMismatchException {
 
     ArrayList<SpotifySong> array = new ArrayList<SpotifySong>();
 
@@ -66,7 +92,7 @@ public class LoadCSV {
       System.out.println("CSV file not found!");
     }
 
-//    System.out.println("Got to delimiter");
+    // System.out.println("Got to delimiter");
 
     if (scnr != null) {
 
@@ -122,7 +148,7 @@ public class LoadCSV {
       }
     }
 
-    System.out.println("number of songs by " + searchTerm + " found: " + songsFromArtist.size());
+    // System.out.println("number of songs by " + searchTerm + " found: " + songsFromArtist.size());
     return songsFromArtist;
   }
 
